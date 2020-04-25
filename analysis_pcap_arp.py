@@ -7,7 +7,7 @@ import dpkt
 import sys
 
 # DEFINE CONSTANTS
-ARP = 0x0806
+ARP = b'\x08\x06'
 
 
 class PCAP:
@@ -56,9 +56,11 @@ def analyze_arp(file_path):
     # LOOP THROUGH THE PACKETS IN THE FILE
     for timestamp, buffer in pcap:
 
-        if buffer[12:14] == ARP:
+        # IF PACKET ISN'T ARP, SKIP IT
+        if buffer[12:14] != ARP:
             continue
 
+        # ADD ONE TO THE TOTAL ARP MESSAGE COUNT
         analysis.increment_arp()
 
     return analysis
