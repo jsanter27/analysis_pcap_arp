@@ -80,7 +80,7 @@ def main(argc, argv):
     """Driver program"""
 
     if argc == 1:
-        file_path = input("Enter the path of the .pcap file: ")
+        file_path = input("\nEnter the path of the .pcap file: ")
         print()
     elif argc > 2:
         print("Invalid Arguments: analysis_pcap_arp.py [file path]")
