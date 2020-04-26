@@ -1,2 +1,8 @@
 # Ignore .idea folder
 .idea/
+
+# Ignore test pcap files
+pcap/
+
+# Ignore screenshot
+arp_message_exchange.JPG

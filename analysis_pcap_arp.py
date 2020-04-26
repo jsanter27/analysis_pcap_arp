@@ -34,9 +34,18 @@ class PCAP:
         self.request_table[request.sender_ip] = request
         return
 
-    def get_request(self, target_ip):
+    def get_request(self, reply):
         """Takes the ARP reply's target IP and returns the corresponding ARP request"""
-        return self.request_table.get(target_ip, None)
+        return self.request_table.get(reply.target_ip, None)
+
+    def __str__(self):
+        string = "\n\n"
+        string += "***********************************************************\n\n"
+        string += "Total ARP Messages in File: " + str(self.total_arp) + "\n\n\n"
+        string += str(self.request) + "\n"
+        string += str(self.reply) + "\n"
+        string += "***********************************************************\n"
+        return string
 
 
 class ARPMessage:
@@ -55,9 +64,9 @@ class ARPMessage:
         self.target_ip = target_ip
 
     def __str__(self):
-        string = "ARP " + self.arp_type + " PACKET:\n"
-        string += "   Hardware Type: " + self.hardware_type + "\n"
-        string += "   Protocol Type: " + self.protocol_type + "\n"
+        string = "ARP " + self.arp_type + " PACKET\n"
+        string += "   Hardware Type: 0x" + self.hardware_type + "\n"
+        string += "   Protocol Type: 0x" + self.protocol_type + "\n"
         string += "   Hardware Size: " + self.hardware_size + "\n"
         string += "   Protocol Size: " + self.protocol_size + "\n"
         string += "   Sender MAC address: " + self.sender_mac + "\n"
@@ -81,7 +90,7 @@ def main(argc, argv):
 
     analysis = analyze_arp(file_path)
 
-    print_analysis(analysis, file_path)
+    print(str(analysis))
 
     return
 
@@ -124,10 +133,12 @@ def analyze_arp(file_path):
         message = ARPMessage(hardware_type, protocol_type, hardware_size, protocol_size, arp_type, sender_mac,
                              sender_ip, target_mac, target_ip)
 
+        # print(message)
+
         if message.arp_type == "REQUEST":
             analysis.add_request(message)
         elif message.arp_type == "REPLY":
-            request = analysis.get_request(message.target_ip)
+            request = analysis.get_request(message)
             analysis.request = request
             analysis.reply = message
 
@@ -180,7 +191,7 @@ def get_protocol_size(buffer):
 def get_arp_type(buffer):
     """Returns String interpretation of the Packet's ARP type (ex. Request, Reply, ...)"""
 
-    arp_type = buffer[20:21].hex()
+    arp_type = buffer[20:22].hex()
 
     if arp_type == REPLY:
         return "REPLY"
@@ -240,20 +251,6 @@ def bytes_to_ip(byte_array):
 
     return str(int(byte_array[0])) + "." + str(int(byte_array[1])) + "." + str(int(byte_array[2])) + "." + \
         str(int(byte_array[3]))
-
-
-def print_analysis(analysis, file_path):
-    """Prints out .pcap file analysis in digestible format"""
-
-    print("\n")
-    print("Analysis of " + file_path + ":\n")
-    print("Total ARP Messages in File: " + str(analysis.total_arp) + "\n")
-    print("Example ARP Exchange:")
-    print(str(analysis.request))
-    print(str(analysis.reply))
-    print("\n")
-
-    return
 
 
 if __name__ == "__main__":
