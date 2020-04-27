@@ -142,6 +142,8 @@ def analyze_arp(file_path):
             analysis.request = request
             analysis.reply = message
 
+    file.close()
+
     return analysis
 
 
